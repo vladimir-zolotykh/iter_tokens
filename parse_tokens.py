@@ -25,11 +25,13 @@ class TokenMeta(type):
         for base in bases:
             if isinstance(base, TokenMeta):
                 TokenMeta._registry.setdefault(base, set()).add(cls)
-        # TokenMeta._update_leaves()
+        TokenMeta._update_leaves()
 
     @classmethod
     def _update_leaves(mcls):
-        mcls.leaves = [c.__name__ for c, subs in mcls._registry.items() if not subs]
+        mcls.leaves = {
+            c.__name__.upper(): c for c, subs in mcls._registry.items() if not subs
+        }
 
 
 @dataclass
@@ -113,9 +115,5 @@ class TestParse(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    try:
-        print(TokenMeta.leaves)
-    except AttributeError:
-        TokenMeta._update_leaves()
-        print(TokenMeta.leaves)
+    print(TokenMeta.leaves)
     # unittest.main()
