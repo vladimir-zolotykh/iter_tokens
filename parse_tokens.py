@@ -42,16 +42,12 @@ class Token(metaclass=TokenMeta):
 
 @dataclass
 class Num(Token):
-    value: int
-
-    def __repr__(self):
-        return int(self.value)
+    def __post_init__(self):
+        self.value = int(self.value)
 
 
 @dataclass
 class Operator(Token):
-    value: str
-
     def __repr__(self):
         return str(self.value)
 
@@ -96,7 +92,7 @@ master_pat = re.compile("|".join([NUM, DIVIDE, PLUS, MINUS, TIMES, LPAREN, RPARE
 
 def iter_tokens(text: str) -> Iterator[Token]:
     for m in re.finditer(master_pat, text):
-        token = Token(m.lastgroup, m.group())
+        token = Token.leaves[m.lastgroup](m.lastgroup, m.group())
         if token.name == "WS":
             continue
         yield token
@@ -105,15 +101,15 @@ def iter_tokens(text: str) -> Iterator[Token]:
 class TestParse(unittest.TestCase):
     def test_10_base(self):
         self.assertEqual(
-            [tok.name for tok in list(iter_tokens("3 + 4 * 5"))],
             ["NUM", "PLUS", "NUM", "TIMES", "NUM"],
+            [tok.name for tok in list(iter_tokens("3 + 4 * 5"))],
         )
         self.assertEqual(
-            [tok.value for tok in list(iter_tokens("3 + 4 * 5"))],
             [3, "+", 4, "*", 5],
+            [tok.value for tok in list(iter_tokens("3 + 4 * 5"))],
         )
 
 
 if __name__ == "__main__":
-    print(TokenMeta.leaves)
-    # unittest.main()
+    # print(TokenMeta.leaves)
+    unittest.main()
