@@ -20,9 +20,7 @@ class Token(NamedTuple):
     value: Any
 
 
-master_pat = re.compile(
-    "|".join([NUM, DIVIDE, PLUS, MINUS, TIMES, LPAREN, RPAREN, LPAREN, WS])
-)
+master_pat = re.compile("|".join([NUM, DIVIDE, PLUS, MINUS, TIMES, LPAREN, RPAREN, WS]))
 
 
 def iter_tokens(text: str) -> Iterator[Token]:
@@ -36,7 +34,8 @@ def iter_tokens(text: str) -> Iterator[Token]:
 class TestParse(unittest.TestCase):
     def test_10_base(self):
         self.assertEqual(
-            list(iter_tokens("3 + 4 * 5", ["NUM", "PLUS", "NUM", "TIMES", "NUM"]))
+            [tok.name for tok in list(iter_tokens("3 + 4 * 5"))],
+            ["NUM", "PLUS", "NUM", "TIMES", "NUM"],
         )
 
 
