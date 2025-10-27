@@ -3,6 +3,7 @@
 # PYTHON_ARGCOMPLETE_OK
 import re
 from typing import NamedTuple, Any, Iterator
+from dataclasses import dataclass
 import unittest
 
 NUM = r"(?P<NUM>\d+)"
@@ -15,9 +16,77 @@ RPAREN = r"(?P<RPAREN>\))"
 WS = r"(?P<WS>\s+)"
 
 
-class Token(NamedTuple):
+class TokenMeta(type):
+    _registry: dict = {}
+
+    def __init__(cls, name, bases, ns):
+        super().__init__(name, bases, ns)
+        TokenMeta._registry.setdefault(cls, set())
+        for base in bases:
+            if isinstance(base, TokenMeta):
+                TokenMeta._registry.setdefault(base, set()).add(cls)
+        # TokenMeta._update_leaves()
+
+    @classmethod
+    def _update_leaves(mcls):
+        mcls.leaves = [c.__name__ for c, subs in mcls._registry.items() if not subs]
+
+
+@dataclass
+class Token(metaclass=TokenMeta):
     name: str
     value: Any
+
+
+@dataclass
+class Num(Token):
+    value: int
+
+    def __repr__(self):
+        return int(self.value)
+
+
+@dataclass
+class Operator(Token):
+    value: str
+
+    def __repr__(self):
+        return str(self.value)
+
+
+@dataclass
+class Plus(Operator):
+    pass
+
+
+@dataclass
+class Minus(Operator):
+    pass
+
+
+@dataclass
+class Times(Operator):
+    pass
+
+
+@dataclass
+class Divide(Operator):
+    pass
+
+
+@dataclass
+class Lparen(Token):
+    pass
+
+
+@dataclass
+class Rparent(Token):
+    pass
+
+
+@dataclass
+class Ws(Token):
+    pass
 
 
 master_pat = re.compile("|".join([NUM, DIVIDE, PLUS, MINUS, TIMES, LPAREN, RPAREN, WS]))
@@ -37,7 +106,16 @@ class TestParse(unittest.TestCase):
             [tok.name for tok in list(iter_tokens("3 + 4 * 5"))],
             ["NUM", "PLUS", "NUM", "TIMES", "NUM"],
         )
+        self.assertEqual(
+            [tok.value for tok in list(iter_tokens("3 + 4 * 5"))],
+            [3, "+", 4, "*", 5],
+        )
 
 
 if __name__ == "__main__":
-    unittest.main()
+    try:
+        print(TokenMeta.leaves)
+    except AttributeError:
+        TokenMeta._update_leaves()
+        print(TokenMeta.leaves)
+    # unittest.main()
