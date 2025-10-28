@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
 import re
-from typing import NamedTuple, Any, Iterator
+from typing import Any, Iterator, ClassVar
 from dataclasses import dataclass
 import unittest
 
@@ -20,10 +20,13 @@ WS = r"(?P<WS>\s+)"
 class Token:
     name: str
     value: Any
+    re: ClassVar[str] = ""
 
 
 @dataclass
 class Num(Token):
+    re = r"(?P<NUM>\d+)"
+
     def __post_init__(self):
         self.value = int(self.value)
 
@@ -36,37 +39,37 @@ class Operator(Token):
 
 @dataclass
 class Plus(Operator):
-    pass
+    re = r"(?P<PLUS>\+)"
 
 
 @dataclass
 class Minus(Operator):
-    pass
+    re = r"(?P<MINUS>-)"
 
 
 @dataclass
 class Times(Operator):
-    pass
+    re = r"(?P<TIMES>\*)"
 
 
 @dataclass
 class Divide(Operator):
-    pass
+    re = r"(?P<DIVIDE>/)"
 
 
 @dataclass
 class Lparen(Token):
-    pass
+    re = r"(?P<LPAREN>\))"
 
 
 @dataclass
 class Rparent(Token):
-    pass
+    re = r"(?P<RPAREN>\()"
 
 
 @dataclass
 class Ws(Token):
-    pass
+    re = r"(?P<WS>\s+)"
 
 
 def find_leaves(base_class: type = Token) -> list[type]:
@@ -85,7 +88,7 @@ def find_leaves(base_class: type = Token) -> list[type]:
 
 
 TOKENS = find_leaves(Token)
-master_pat = re.compile("|".join([NUM, DIVIDE, PLUS, MINUS, TIMES, LPAREN, RPAREN, WS]))
+master_pat = re.compile("|".join([cls.re for cls in TOKENS]))
 
 
 def iter_tokens(text: str) -> Iterator[Token]:
