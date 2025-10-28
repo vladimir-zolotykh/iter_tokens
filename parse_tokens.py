@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
 import re
-from typing import Any, Iterator, ClassVar
+from typing import Any, Iterator, ClassVar, reveal_type
 from dataclasses import dataclass
 import unittest
 
@@ -72,8 +72,8 @@ class Ws(Token):
     re = r"(?P<WS>\s+)"
 
 
-def find_leaves(base_class: type = Token) -> list[type]:
-    leaves: set(type) = set()
+def find_leaves(base_class: type[Token] = Token) -> set[type[Token]]:
+    leaves: set[type[Token]] = set()
 
     def recurse(cls):
         subs = cls.__subclasses__()
@@ -95,13 +95,15 @@ def iter_tokens(text: str) -> Iterator[Token]:
     for m in re.finditer(master_pat, text):
         if m.lastgroup == "WS":
             continue
-        token_cls = type(None)
+        # token_cls: type[Token] | type[None] = type(None)
         for cls in TOKENS:
             if cls.__name__.upper() == m.lastgroup:
                 token_cls = cls
                 break
-        token = token_cls(m.lastgroup, m.group())
-        yield token
+        # reveal_type(token_cls)
+        if token_cls is not type(None) and m.lastgroup:
+            token = token_cls(m.lastgroup, m.group())
+            yield token
 
 
 class TestParse(unittest.TestCase):
