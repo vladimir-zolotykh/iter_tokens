@@ -16,26 +16,8 @@ RPAREN = r"(?P<RPAREN>\))"
 WS = r"(?P<WS>\s+)"
 
 
-class TokenMeta(type):
-    _registry: dict = {}
-
-    def __init__(cls, name, bases, ns):
-        super().__init__(name, bases, ns)
-        TokenMeta._registry.setdefault(cls, set())
-        for base in bases:
-            if isinstance(base, TokenMeta):
-                TokenMeta._registry.setdefault(base, set()).add(cls)
-        TokenMeta._update_leaves()
-
-    @classmethod
-    def _update_leaves(mcls):
-        mcls.leaves = {
-            c.__name__.upper(): c for c, subs in mcls._registry.items() if not subs
-        }
-
-
 @dataclass
-class Token(metaclass=TokenMeta):
+class Token:
     name: str
     value: Any
 
@@ -87,14 +69,35 @@ class Ws(Token):
     pass
 
 
+def find_leaves(base_class: type = Token) -> list[type]:
+    leaves: set(type) = set()
+
+    def recurse(cls):
+        subs = cls.__subclasses__()
+        if not subs:
+            leaves.add(cls)
+        else:
+            for sub in subs:
+                recurse(sub)
+
+    recurse(base_class)
+    return leaves
+
+
+TOKENS = find_leaves(Token)
 master_pat = re.compile("|".join([NUM, DIVIDE, PLUS, MINUS, TIMES, LPAREN, RPAREN, WS]))
 
 
 def iter_tokens(text: str) -> Iterator[Token]:
     for m in re.finditer(master_pat, text):
-        token = Token.leaves[m.lastgroup](m.lastgroup, m.group())
-        if token.name == "WS":
+        if m.lastgroup == "WS":
             continue
+        token_cls = type(None)
+        for cls in TOKENS:
+            if cls.__name__.upper() == m.lastgroup:
+                token_cls = cls
+                break
+        token = token_cls(m.lastgroup, m.group())
         yield token
 
 
@@ -111,5 +114,4 @@ class TestParse(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # print(TokenMeta.leaves)
     unittest.main()
