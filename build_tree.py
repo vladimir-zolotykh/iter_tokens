@@ -84,6 +84,8 @@ class NodeTree:
 
 
 class TestNodeTree(unittest.TestCase):
+    maxDiff = None  # disables truncation
+
     def setUp(self):
         self.t = NodeTree()
 
@@ -92,7 +94,10 @@ class TestNodeTree(unittest.TestCase):
             repr(self.t.build("2 + 3")),
             "BinaryOperator((<class 'parse_tokens.Plus'>,), Num(2), Num(3))",
         )
-        # self.assertEqual(self.t.build("3 + 4 * 5"), 23)
+        self.assertEqual(
+            repr(self.t.build("3 + 4 * 5")),
+            "BinaryOperator((<class 'parse_tokens.Plus'>,), Num(3), BinaryOperator((<class 'parse_tokens.Times'>,), Num(4), Num(5)))",
+        )
         # self.assertEqual(self.t.build("2 + (3 + 4) * 5"), 37)
         # with self.assertRaises(SyntaxError):
         #     self.t.build("2 + (3 + * 4)")
