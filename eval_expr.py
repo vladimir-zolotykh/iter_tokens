@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
+from typing import Iterator
 import unittest
 import parse_tokens as PT
 
 
 class Evaluator:
+    tok: PT.Token | None = None  # current token
+    tok_next: PT.Token | None = None  # next (look-ahead) token
+    tokens: Iterator[PT.Token]
+
     def _advance(self) -> None:
         self.tok, self.tok_next = self.tok_next, next(self.tokens, None)
 
@@ -20,8 +25,6 @@ class Evaluator:
             raise SyntaxError(f"Expected {tok_type}")
 
     def parse(self, text):
-        self.tok: PT.Token | None = None  # current token
-        self.tok_next: PT.Token | None = None  # next (look-ahead) token
         self.tokens = PT.iter_tokens(text)
         self._advance()
         return self.expr()
