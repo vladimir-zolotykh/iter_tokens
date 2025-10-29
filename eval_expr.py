@@ -29,7 +29,7 @@ class Evaluator:
     def expr(self):
         res = self.term()
         while self._accept(PT.Plus) or self._accept(PT.Minus):
-            op = self.tok.type
+            op = type(self.tok)
             right = self.term()
             if op == PT.Plus:
                 res += right
@@ -40,7 +40,7 @@ class Evaluator:
     def term(self):
         res = self.factor()
         while self._accept(PT.Times) or self._accept(PT.Divide):
-            op = self.tok.type
+            op = type(self.tok)
             right = self.factor()
             if op == PT.Times:
                 res *= right
@@ -64,7 +64,11 @@ class TestEvaluator(unittest.TestCase):
         self.e = Evaluator()
 
     def test_10_expr(self):
-        self.assertEqual(self.e.parse("3 + 4 * 5"), 24)
+        self.assertEqual(self.e.parse("2 + 3"), 5)
+        self.assertEqual(self.e.parse("3 + 4 * 5"), 23)
+        self.assertEqual(self.e.parse("2 + (3 + 4) * 5"), 37)
+        with self.assertRaises(SyntaxError):
+            self.e.parse("2 + (3 + * 4)")
 
 
 if __name__ == "__main__":

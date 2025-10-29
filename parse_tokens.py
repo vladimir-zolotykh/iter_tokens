@@ -59,12 +59,12 @@ class Divide(Operator):
 
 @dataclass
 class Lparen(Token):
-    re = r"(?P<LPAREN>\))"
+    re = r"(?P<LPAREN>\()"
 
 
 @dataclass
 class Rparen(Token):
-    re = r"(?P<RPAREN>\()"
+    re = r"(?P<RPAREN>\))"
 
 
 @dataclass
