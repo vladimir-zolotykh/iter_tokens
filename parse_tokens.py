@@ -63,7 +63,7 @@ class Lparen(Token):
 
 
 @dataclass
-class Rparent(Token):
+class Rparen(Token):
     re = r"(?P<RPAREN>\()"
 
 
