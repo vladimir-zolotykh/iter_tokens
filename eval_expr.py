@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
+import unittest
 import parse_tokens as PT
 
 
@@ -56,3 +57,15 @@ class Evaluator:
             return res
         else:
             raise SyntaxError(f"Expected {PT.Num} or {PT.Lparen}")
+
+
+class TestEvaluator(unittest.TestCase):
+    def setUp(self):
+        self.e = Evaluator()
+
+    def test_10_expr(self):
+        self.assertEqual(self.e.parse("3 + 4 * 5"), 24)
+
+
+if __name__ == "__main__":
+    unittest.main()
