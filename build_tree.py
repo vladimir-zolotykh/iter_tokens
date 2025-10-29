@@ -17,13 +17,20 @@ class BinaryOperator(Node):
         left: Node | None = None,
         right: Node | None = None,
     ) -> None:
+        self.operator = (operator,)
         self.left = left
         self.right = right
+
+    def __repr__(self):
+        return f"BinaryOperator({self.operator}, {self.left}, {self.right})"
 
 
 class Num(Node):
     def __init__(self, val: int):
         self.val = val
+
+    def __repr__(self):
+        return f"Num({self.val})"
 
 
 class NodeTree:
@@ -50,26 +57,19 @@ class NodeTree:
         return self.expr()
 
     def expr(self) -> Node:
-        res: None = BinaryOperator(left=self.term())
+        res: Node = self.term()
         while self._accept(PT.Plus) or self._accept(PT.Minus):
-            right: Node = BinaryOperator(right=self.term())
-            res.right = (
-                right
-                if not res.right
-                else BinaryOperator(type(self.tok), left=res, right=right)
-            )
+            op = type(self.tok)
+            right: Node = self.term()
+            res = BinaryOperator(op, left=res, right=right)
         return res
 
     def term(self) -> Node:
-        res: None = BinaryOperator(left=self.factor())
+        res: None = self.factor()
         while self._accept(PT.Times) or self._accept(PT.Divide):
-            # op = type(self.tok)
-            right: Node = Node(right=self.factor())
-            res.right = (
-                right
-                if not res.right
-                else BinaryOperator(type(self.tok), left=res, right=right)
-            )
+            op = type(self.tok)
+            right: Node = self.factor()
+            res = BinaryOperator(op, left=res, right=right)
         return res
 
     def factor(self) -> Node:
@@ -88,7 +88,10 @@ class TestNodeTree(unittest.TestCase):
         self.t = NodeTree()
 
     def test_10_expr(self):
-        self.assertEqual(self.t.build("2 + 3"), 5)
+        self.assertEqual(
+            repr(self.t.build("2 + 3")),
+            "BinaryOperator((<class 'parse_tokens.Plus'>,), Num(2), Num(3))",
+        )
         # self.assertEqual(self.t.build("3 + 4 * 5"), 23)
         # self.assertEqual(self.t.build("2 + (3 + 4) * 5"), 37)
         # with self.assertRaises(SyntaxError):
