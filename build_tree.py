@@ -85,25 +85,40 @@ class TestEvaluate(unittest.TestCase):
     def setUp(self):
         self.t = NodeTree()
         self.vi = VI.Evaluate()
-        self.lisp = VI.Lisp()
 
     def test_10_expr(self):
         self.assertEqual(self.vi.visit(self.t.build("2 + 3")), 5)
-        self.assertEqual(self.lisp.visit(self.t.build("2 + 3")), "(+ 2 3)")
 
     def test_20_expr(self):
         self.assertEqual(self.vi.visit(self.t.build("2 + 3 * 4")), 14)
-        self.assertEqual(self.lisp.visit(self.t.build("2 + 3 * 4")), "(+ 2 (* 3 4))")
 
     def test_30_expr(self):
         self.assertEqual(self.vi.visit(self.t.build("2 + (3 + 4) * 5")), 37)
+
+    def test_40_expr(self):
+        with self.assertRaises(SyntaxError):
+            self.vi.visit(self.t.build("2 + (3 + * 4)"))
+
+
+class TestLisp(unittest.TestCase):
+    maxDiff = None
+
+    def setUp(self):
+        self.t = NodeTree()
+        self.lisp = VI.Lisp()
+
+    def test_10_expr(self):
+        self.assertEqual(self.lisp.visit(self.t.build("2 + 3")), "(+ 2 3)")
+
+    def test_20_expr(self):
+        self.assertEqual(self.lisp.visit(self.t.build("2 + 3 * 4")), "(+ 2 (* 3 4))")
+
+    def test_30_expr(self):
         self.assertEqual(
             self.lisp.visit(self.t.build("2 + (3 + 4) * 5")), "(+ 2 (* (+ 3 4) 5))"
         )
 
     def test_40_expr(self):
-        with self.assertRaises(SyntaxError):
-            self.vi.visit(self.t.build("2 + (3 + * 4)"))
         with self.assertRaises(SyntaxError):
             self.lisp.visit(self.t.build("2 + (3 + * 4)"))
 
