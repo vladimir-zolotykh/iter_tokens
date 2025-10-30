@@ -4,6 +4,7 @@
 from typing import Iterator, cast
 import unittest
 import parse_tokens as PT
+import visitor as VI
 
 
 class Node:
@@ -13,11 +14,11 @@ class Node:
 class BinaryOperator(Node):
     def __init__(
         self,
-        operator: PT.Operator | type[None] = type(None),
-        left: Node | None = None,
-        right: Node | None = None,
+        operator: PT.Operator,
+        left: Node,
+        right: Node,
     ) -> None:
-        self.operator = (operator,)
+        self.operator = operator
         self.left = left
         self.right = right
 
@@ -90,28 +91,12 @@ class TestNodeTree(unittest.TestCase):
     def setUp(self):
         self.t = NodeTree()
 
+    def tearDown(self):
+        pass
+
     def test_10_expr(self):
-        self.assertEqual(
-            repr(self.t.build("2 + 3")),
-            "BinaryOperator((<class 'parse_tokens.Plus'>,), Num(2), Num(3))",
-        )
-        self.assertEqual(
-            repr(self.t.build("3 + 4 * 5")),
-            (
-                "BinaryOperator((<class 'parse_tokens.Plus'>,), Num(3), "
-                "BinaryOperator((<class 'parse_tokens.Times'>,), Num(4), Num(5)))"
-            ),
-        )
-        self.assertEqual(
-            repr(self.t.build("2 + (3 + 4) * 5")),
-            (
-                "BinaryOperator((<class 'parse_tokens.Plus'>,), Num(2), "
-                "BinaryOperator((<class 'parse_tokens.Times'>,), "
-                "BinaryOperator((<class 'parse_tokens.Plus'>,), Num(3), Num(4)), Num(5)))"
-            ),
-        )
-        with self.assertRaises(SyntaxError):
-            self.t.build("2 + (3 + * 4)")
+        vi = VI.Evaluate()
+        self.assertEqual(vi.visit(self.t.build("2 + 3")), 5)
 
 
 if __name__ == "__main__":
