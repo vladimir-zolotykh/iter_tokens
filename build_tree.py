@@ -22,16 +22,10 @@ class BinaryOperator(Node):
         self.left = left
         self.right = right
 
-    def __repr__(self):
-        return f"BinaryOperator({self.operator}, {self.left}, {self.right})"
-
 
 class Num(Node):
     def __init__(self, val: int):
         self.val = val
-
-    def __repr__(self):
-        return f"Num({self.val})"
 
 
 class NodeTree:
@@ -85,18 +79,25 @@ class NodeTree:
             raise SyntaxError(f"Expected {PT.Num} or {PT.Lparen}")
 
 
-class TestNodeTree(unittest.TestCase):
+class TestEvaluate(unittest.TestCase):
     maxDiff = None  # disables truncation
 
     def setUp(self):
         self.t = NodeTree()
-
-    def tearDown(self):
-        pass
+        self.vi = VI.Evaluate()
 
     def test_10_expr(self):
-        vi = VI.Evaluate()
-        self.assertEqual(vi.visit(self.t.build("2 + 3")), 5)
+        self.assertEqual(self.vi.visit(self.t.build("2 + 3")), 5)
+
+    def test_20_expr(self):
+        self.assertEqual(self.vi.visit(self.t.build("2 + 3 * 4")), 14)
+
+    def test_30_expr(self):
+        self.assertEqual(self.vi.visit(self.t.build("2 + (3 + 4) * 5")), 37)
+
+    def test_40_expr(self):
+        with self.assertRaises(SyntaxError):
+            self.vi.visit(self.t.build("2 + (3 + * 4)"))
 
 
 if __name__ == "__main__":

@@ -24,9 +24,13 @@ class Evaluate(Visitor):
         return int(node.val)
 
     def visit_BinaryOperator(self, node: BT.BinaryOperator) -> int:
-        print(node)
-        func = operator.add if node.operator == PT.Plus else operator.sub
-        res = func(self.visit(node.left), self.visit(node.right))
+        op = {
+            PT.Plus: operator.add,
+            PT.Minus: operator.sub,
+            PT.Times: operator.mul,
+            PT.Divide: operator.floordiv,
+        }[node.operator]
+        res = op(self.visit(node.left), self.visit(node.right))
         return res
 
 
