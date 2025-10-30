@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
-from typing import Iterator
+from typing import Iterator, cast
 import unittest
 import parse_tokens as PT
 
@@ -13,7 +13,7 @@ class Node:
 class BinaryOperator(Node):
     def __init__(
         self,
-        operator: PT.Operator = type(None),
+        operator: PT.Operator | type[None] = type(None),
         left: Node | None = None,
         right: Node | None = None,
     ) -> None:
@@ -59,22 +59,23 @@ class NodeTree:
     def expr(self) -> Node:
         res: Node = self.term()
         while self._accept(PT.Plus) or self._accept(PT.Minus):
-            op = type(self.tok)
+            op = cast(PT.Operator, type(self.tok))
             right: Node = self.term()
             res = BinaryOperator(op, left=res, right=right)
         return res
 
     def term(self) -> Node:
-        res: None = self.factor()
+        res: Node = self.factor()
         while self._accept(PT.Times) or self._accept(PT.Divide):
-            op = type(self.tok)
+            op = cast(PT.Operator, type(self.tok))
             right: Node = self.factor()
             res = BinaryOperator(op, left=res, right=right)
         return res
 
     def factor(self) -> Node:
         if self._accept(PT.Num):
-            return Num(int(self.tok.value))
+            tok: PT.Num = cast(PT.Num, self.tok)
+            return Num(int(tok.value))
         elif self._accept(PT.Lparen):
             res: Node = self.expr()
             self._expect(PT.Rparen)
