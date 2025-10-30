@@ -101,9 +101,16 @@ class TestNodeTree(unittest.TestCase):
                 "BinaryOperator((<class 'parse_tokens.Times'>,), Num(4), Num(5)))"
             ),
         )
-        # self.assertEqual(self.t.build("2 + (3 + 4) * 5"), 37)
-        # with self.assertRaises(SyntaxError):
-        #     self.t.build("2 + (3 + * 4)")
+        self.assertEqual(
+            repr(self.t.build("2 + (3 + 4) * 5")),
+            (
+                "BinaryOperator((<class 'parse_tokens.Plus'>,), Num(2), "
+                "BinaryOperator((<class 'parse_tokens.Times'>,), "
+                "BinaryOperator((<class 'parse_tokens.Plus'>,), Num(3), Num(4)), Num(5)))"
+            ),
+        )
+        with self.assertRaises(SyntaxError):
+            self.t.build("2 + (3 + * 4)")
 
 
 if __name__ == "__main__":
