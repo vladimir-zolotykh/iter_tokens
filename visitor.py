@@ -35,8 +35,15 @@ class Evaluate(Visitor):
 
 
 class Lisp(Visitor):
-    def visit_Num(self, node):
-        pass
+    def visit_Num(self, node) -> str:
+        return str(node.val)
 
-    def visit_BinaryOperator(self, node):
-        pass
+    def visit_BinaryOperator(self, node: BT.BinaryOperator) -> str:
+        op = {
+            PT.Plus: "+",
+            PT.Minus: "-",
+            PT.Times: "*",
+            PT.Divide: "//",
+        }[node.operator]
+        res = f"({op} {self.visit(node.left)} {self.visit(node.right)})"
+        return res
